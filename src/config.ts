@@ -20,7 +20,13 @@ export const GameConfig: Phaser.Types.Core.GameConfig = {
   scene: [Boot,BackGround,Play],
   backgroundColor: '#003412',
   physics: {
-    default: 'arcade'
+    default: "matter",
+    matter: {
+        gravity: {
+            y: 2
+        },
+        debug: true
+    }
 },
   render: { pixelArt: false, antialias: true }
 };

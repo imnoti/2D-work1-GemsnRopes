@@ -37,12 +37,12 @@ export default class BackGround extends Phaser.Scene{
             repeat:-1
           });
 
-          let topGround=this.add.tileSprite(0,1000,this.scale.width,128,'topground').setOrigin(0,0);
-    
-          //返回游戏对象的边界，类似长方形
-          let topGroundBottom=topGround.getBounds().bottom;
-          let bottomGround=this.add.tileSprite(0,topGroundBottom,this.scale.width,this.scale.height-topGroundBottom,'bottomground');
-          bottomGround.setOrigin(0,0);
+        
+        let topGround=this.add.tileSprite(0,1000,this.scale.width,128,'topground').setOrigin(0,0);
+           //返回游戏对象的边界，类似长方形
+        let topGroundBottom=topGround.getBounds().bottom;
+        let bottomGround=this.add.tileSprite(0,topGroundBottom,this.scale.width,this.scale.height-topGroundBottom,'bottomground');
+        bottomGround.setOrigin(0,0);
     
         }
    
