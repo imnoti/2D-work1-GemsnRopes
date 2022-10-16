@@ -1,3 +1,4 @@
+//资源加载
 export default class Boot extends Phaser.Scene{
     constructor() {
         super("Boot");
@@ -12,6 +13,7 @@ export default class Boot extends Phaser.Scene{
         this.load.image('gamename','gamename.png');
         this.load.image('play','play.png');
         this.load.spritesheet('player','player.png',{frameWidth:100,frameHeight:116});
+        this.load.image('store','store.png');
     }
     create()
     {

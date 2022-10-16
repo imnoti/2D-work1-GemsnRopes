@@ -1,3 +1,4 @@
+//背景
 export default class BackGround extends Phaser.Scene{
     //构造函数
     constructor(){
