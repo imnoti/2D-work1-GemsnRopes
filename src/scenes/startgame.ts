@@ -12,15 +12,19 @@ export default class StartGame extends Phaser.GameObjects.Container{
         var playing=scene.add.sprite(scene.scale.width/2,700,'play').setInteractive();
         gamename.setDepth(12);
         playing.setDepth(12);
-        scene.add.existing(this);
-
-        playing.on('pointerdown',()=>{
+        //scene.add.existing(this);
+        
+        //鼠标弹起时才能发送事件
+        playing.on('pointerup',()=>{
             mask.setActive(false);
             mask.setVisible(false);
             playing.setActive(false);
             playing.setVisible(false);
             gamename.setActive(false);
             gamename.setVisible(false);
+            //发送开始游戏事件
+            startgameProxy.emit(START_GAME);
+            
         })
        
     }
