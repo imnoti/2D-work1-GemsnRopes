@@ -1,8 +1,8 @@
 import { BodyType } from "matter";
 import { startgameProxy,START_GAME } from "../core/proxy";
+import{upadtescoreProxy,UPDATE_SCORE} from "../core/proxy";
 import BackGround from './background';
 import StartGame from './startgame';
-
 export default class PlayScene extends Phaser.Scene{
     private startmenu!:StartGame;
     private player!:Phaser.Physics.Matter.Sprite;
@@ -12,8 +12,9 @@ export default class PlayScene extends Phaser.Scene{
     private  STORE:number=2;
     private  STAR:number=1;
     private  PLAYER:number=0;
-    private nonicollosion=1;
-    private icollosion=2;
+    private nonicollosion:number=1;
+    private icollosion:number=2;
+    private m_score=0;
     private rope;//绳子/约束
     constructor(){
         super({key:"Play"});
@@ -26,13 +27,10 @@ export default class PlayScene extends Phaser.Scene{
       
         this.scene.launch('BackGround');
         this.startmenu=new StartGame(this);//开始界面
-
         this.player=this.matter.add.sprite(this.scale.width/2,1000,'player').setScale(0.75,0.75);
         this.player.body.label=this.PLAYER;
         this.player.setCollisionGroup(this.icollosion);
        
-       
-      
         //添加石头
         for(let i=0;i<4;i++)
         {
@@ -57,15 +55,16 @@ export default class PlayScene extends Phaser.Scene{
         this.rope=null;
         //matter中添加世界碰撞
         this.matter.world.on("collisionstart",this.IcollisionStart,this);
-
         //添加开始游戏的事件
         startgameProxy.on(START_GAME, this.StateMyGame,this);
         //当当前场景关闭时,取消监听
         this.events.on(Phaser.Scenes.Events.SHUTDOWN,()=>{
         startgameProxy.off(START_GAME, this.StateMyGame,this);
        });
-      
+
+       
         }
+
     update(): void {
         if(this.rope){
           //更新绳子的长度
@@ -92,12 +91,12 @@ export default class PlayScene extends Phaser.Scene{
     let distance=Phaser.Math.Distance.Between(body1.position.x,body1.position.y,body2.position.x,body2.position.y)
     if(distance>=25)
     {
-       
       this.rope=this.matter.add.constraint(body1,body2,distance,0);
     }
     else{
       this.player.setStatic(true);
     }
+
     }
     //释放绳子
     releaseHook():void
@@ -111,9 +110,11 @@ export default class PlayScene extends Phaser.Scene{
     //游戏开始事件
    StateMyGame():void
    { 
-    //event listeners
      this.input.on('pointerdown',this.fireHook,this);
      this.input.on('pointerup',this.releaseHook,this);
+
+     this.scene.launch('SCOREHUD');
+     this.scene.bringToTop('SCOREHUD');
    }
   //随机出现宝石
    randstar():void
@@ -136,7 +137,9 @@ export default class PlayScene extends Phaser.Scene{
       b2.gameObject.active=false;
       b2.gameObject.visible=false;
       b2.collisionFilter.group = this.nonicollosion;
-      b2.collisionFilter.mask = 0
+      b2.collisionFilter.mask = 0;
+      this.m_score+=1;
+      upadtescoreProxy.emit(UPDATE_SCORE,this.m_score);
       this.randstar();
     }
    }

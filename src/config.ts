@@ -2,6 +2,7 @@ import 'phaser';
 import BackGround from './scenes/background';
 import Boot from './scenes/boot';
 import Play from './scenes/play';
+import Score from './scenes/score'
 
 
 export const GameConfig: Phaser.Types.Core.GameConfig = {
@@ -17,7 +18,7 @@ export const GameConfig: Phaser.Types.Core.GameConfig = {
   },
   type: Phaser.AUTO,
   parent: 'game',
-  scene: [Boot,BackGround,Play],
+  scene: [Boot,BackGround,Play,Score],
   backgroundColor: '#003412',
   physics: {
     default: "matter",

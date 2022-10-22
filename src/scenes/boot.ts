@@ -15,11 +15,11 @@ export default class Boot extends Phaser.Scene{
         this.load.spritesheet('player','player.png',{frameWidth:100,frameHeight:116});
         this.load.spritesheet('star','star.png',{frameWidth:100,frameHeight:100});
         this.load.image('store','store.png');
-
     }
     create()
     {
         //启动StartScene 场景
+        console.log("加载场景");
         this.scene.start("Play")
     }
 }
