@@ -16,6 +16,7 @@ export default class PlayScene extends Phaser.Scene{
     private icollosion:number=2;
     private m_score=0;
     private rope;//绳子/约束
+    private graphics!: Phaser.GameObjects.Graphics;
     constructor(){
         super({key:"Play"});
     }
@@ -30,7 +31,6 @@ export default class PlayScene extends Phaser.Scene{
         this.player=this.matter.add.sprite(this.scale.width/2,1000,'player').setScale(0.75,0.75);
         this.player.body.label=this.PLAYER;
         this.player.setCollisionGroup(this.icollosion);
-       
         //添加石头
         for(let i=0;i<4;i++)
         {
@@ -51,8 +51,16 @@ export default class PlayScene extends Phaser.Scene{
           star.body.label=this.STAR;
           this.stars.push(star as never);
         }
+        
         this.randstar();
         this.rope=null;
+        this.graphics = this.add.graphics();
+        /*
+        var rect = new Phaser.Geom.Rectangle(0, 0, 10, 20);
+       .setVisible(false);
+        this.graphics.fillRectShape(rect);
+        this.graphics.generateTexture('ropes');
+        */
         //matter中添加世界碰撞
         this.matter.world.on("collisionstart",this.IcollisionStart,this);
         //添加开始游戏的事件
@@ -62,13 +70,16 @@ export default class PlayScene extends Phaser.Scene{
         startgameProxy.off(START_GAME, this.StateMyGame,this);
        });
 
-       
+      
         }
 
     update(): void {
+       
         if(this.rope){
+          this.graphics.clear();
           //更新绳子的长度
           this.rope.length-=4;
+          this.matter.world.renderConstraint(this.rope,this.graphics,0x0000ff,1,2,1,1,1);
         }
       }
 
@@ -84,14 +95,17 @@ export default class PlayScene extends Phaser.Scene{
       index=2;
     else
       index=3;
+
     let body1=this.player.body as BodyType;
     let store=this.stores[index] as Phaser.Physics.Matter.Sprite;
     let body2=store.body as BodyType;
      //Calculate the distance between two stes of coordinates(points)
     let distance=Phaser.Math.Distance.Between(body1.position.x,body1.position.y,body2.position.x,body2.position.y)
+   
     if(distance>=25)
     {
       this.rope=this.matter.add.constraint(body1,body2,distance,0);
+      this.matter.world.renderConstraint(this.rope,this.graphics,0x0000ff,1,2,1,1,1);
     }
     else{
       this.player.setStatic(true);
@@ -101,7 +115,8 @@ export default class PlayScene extends Phaser.Scene{
     //释放绳子
     releaseHook():void
     {
-      this.player.setStatic(false);
+      
+      this.graphics.clear();
       if(this.rope){
         this.matter.world.removeConstraint(this.rope);
         this.rope=null;
@@ -112,7 +127,6 @@ export default class PlayScene extends Phaser.Scene{
    { 
      this.input.on('pointerdown',this.fireHook,this);
      this.input.on('pointerup',this.releaseHook,this);
-
      this.scene.launch('SCOREHUD');
      this.scene.bringToTop('SCOREHUD');
    }
@@ -121,7 +135,7 @@ export default class PlayScene extends Phaser.Scene{
    {
     let index:number=Phaser.Math.RND.between(0,this.starsnum-1);
     let x:number=Phaser.Math.RND.between(0,this.scale.width-100);
-    let y:number=Phaser.Math.RND.between(0,this.scale.height/3*2)
+    let y:number=Phaser.Math.RND.between(0,this.scale.height/3*2);
     this.stars[index].setCollisionGroup(this.icollosion);
     this.stars[index].setPosition(x,y);
     this.stars[index].setVisible(true);
