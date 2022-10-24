@@ -44,7 +44,6 @@ export default class BackGround extends Phaser.Scene{
         let topGroundBottom=topGround.getBounds().bottom;
         let bottomGround=this.add.tileSprite(0,topGroundBottom,this.scale.width,this.scale.height-topGroundBottom,'bottomground');
         bottomGround.setOrigin(0,0);
-    
         }
    
 }
