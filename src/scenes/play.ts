@@ -3,9 +3,12 @@ import { BodyType } from "matter";
 import { startgameProxy,START_GAME } from "../core/proxy";
 import{upadtescoreProxy,UPDATE_SCORE} from "../core/proxy";
 import {timingProxy,TIMING } from "../core/proxy";
-import {gamefailedProxy,GAMEFAILED } from "../core/proxy";
+import {timerstopProxy,TIMER_STOP } from "../core/proxy";
+import {gamefailedProxy,GAME_FAILED } from "../core/proxy";
+import {nogameProxy,NO_GAME } from "../core/proxy";
 import BackGround from './background';
-import StartGame from './startgame';
+import StartGame from '../sprites/startgame';
+import GameFail from '../sprites/gamefail';
 import Timer from './timer';
 
 export default class PlayScene extends Phaser.Scene{
@@ -14,9 +17,12 @@ export default class PlayScene extends Phaser.Scene{
     private stores :Phaser.Physics.Matter.Image[]=[];
     private stars:Phaser.Physics.Matter.Image[]=[];
     private m_score;
+    private target_score;
     private rope;//绳子/约束
     private graphics!: Phaser.GameObjects.Graphics;//渲染约束
     private timerbar!:Timer;
+    private gamefail!:GameFail;
+    private win!:Phaser.GameObjects.Image;
     constructor(){
         super({key:"Play"});
     }
@@ -34,6 +40,10 @@ export default class PlayScene extends Phaser.Scene{
         //更新分数
         let old=localStorage.getItem(gameOptions.localStorageName);
         this.m_score=old?parseInt(old):0;
+        console.log(this.m_score);
+       
+        this.target_score=gameOptions.target_1;
+        console.log(this.target_score);
 
         this.player=this.matter.add.sprite(this.scale.width/2,1000,'player').setScale(0.75,0.75);
         this.player.body.label=gameOptions.PLAYER;
@@ -61,17 +71,40 @@ export default class PlayScene extends Phaser.Scene{
         
         this.randstar();
         this.rope=null;
+
+        this.gamefail=new GameFail(this);
+        this.gamefail.setVisible(false);
+        this.gamefail.setActive(false);
+
+        this.timerbar=new Timer(this);
+        this.timerbar.setVisible(false).stoptimer();
+       
+
+        this.win=this.add.image(this.scale.width/2,this.scale.height/3,'win').setVisible(false).setScale(2,2);
+
         this.graphics = this.add.graphics();
         //matter中添加世界碰撞
         this.matter.world.on("collisionstart",this.IcollisionStart,this);
         //添加开始游戏的事件
+
         startgameProxy.on(START_GAME, this.StateMyGame,this);
         //当当前场景关闭时,取消监听
         this.events.on(Phaser.Scenes.Events.SHUTDOWN,()=>{
         startgameProxy.off(START_GAME, this.StateMyGame,this);
        });
 
-      
+       gamefailedProxy.on(GAME_FAILED,this.gamefiled,this);
+
+       this.events.on(Phaser.Scenes.Events.SHUTDOWN,()=>{
+        gamefailedProxy.off(GAME_FAILED,this.gamefiled,this);
+       });
+
+       nogameProxy.on(NO_GAME,this.nogame,this);
+       this.events.on(Phaser.Scenes.Events.SHUTDOWN,()=>{
+        nogameProxy.off(NO_GAME,this.nogame,this);
+       });
+
+
         }
 
     update(): void {
@@ -82,7 +115,6 @@ export default class PlayScene extends Phaser.Scene{
           this.rope.length-=gameOptions.constraintSpeed;
           this.matter.world.renderConstraint(this.rope,this.graphics,0x0000ff,1,2,1,1,1);
         }
-        console.log(localStorage.getItem(gameOptions.localStorageName))
       }
 
     //发射绳子事件
@@ -104,7 +136,7 @@ export default class PlayScene extends Phaser.Scene{
      //Calculate the distance between two stes of coordinates(points)
     let distance=Phaser.Math.Distance.Between(body1.position.x,body1.position.y,body2.position.x,body2.position.y)
    
-    if(distance>=25)
+    if(distance>=gameOptions.storeRadius)
     {
       this.rope=this.matter.add.constraint(body1,body2,distance,0);
       this.matter.world.renderConstraint(this.rope,this.graphics,0x0000ff,1,2,1,1,1);
@@ -127,13 +159,23 @@ export default class PlayScene extends Phaser.Scene{
     //游戏开始事件
    StateMyGame():void
    { 
+    //关闭开始ui
+    this.startmenu.setVisible(false);
+    this.startmenu.setActive(false);
+    //启动鼠标点击事件
      this.input.on('pointerdown',this.fireHook,this);
      this.input.on('pointerup',this.releaseHook,this);
+     //同时运行分数ui
      this.scene.launch('SCOREHUD');
+     //放到最上层
      this.scene.bringToTop('SCOREHUD');
-     this.timerbar=new Timer(this);
-     timingProxy.emit(TIMING);
-    
+     //开始计时
+     this.timerbar.setVisible(true).starttimer();
+     
+   }
+   GameOver():void{
+    this.input.off('pointerdown',this.fireHook,this);
+     this.input.off('pointerup',this.releaseHook,this);
    }
   //随机出现宝石
    randstar():void
@@ -158,10 +200,33 @@ export default class PlayScene extends Phaser.Scene{
       b2.collisionFilter.group = gameOptions.nonicollosion;
       b2.collisionFilter.mask = 0;
       this.m_score+=1;
-      localStorage.setItem(gameOptions.localStorageName,this.m_score);
+      
       upadtescoreProxy.emit(UPDATE_SCORE,this.m_score);
+      if(this.m_score==this.target_score)
+      {
+      this.win.setVisible(true);
+      timerstopProxy.emit(TIMER_STOP);
+      this.timerbar.stoptimer();
+      this.GameOver();
+      localStorage.setItem(gameOptions.localStorageName,this.m_score);
+      }
+
       this.randstar();
     }
+   }
+
+   gamefiled():void{
+    console.log('游戏结束事件发生');
+    this.GameOver();
+    this.gamefail.setVisible(true);
+    this.gamefail.setActive(true);
+   }
+   nogame():void{
+
+    this.GameOver();
+    this.startmenu.setVisible(true);
+    this.startmenu.setActive(true);
+    this.player.setPosition(this.scale.width/2,1000);
    }
    
 }

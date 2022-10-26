@@ -26,6 +26,6 @@ export const gameOptions ={
     //当前关卡
     localStorageName1:'level',
     //第一关的目标分数
-    target_1:10
+    target_1:1
 
 }

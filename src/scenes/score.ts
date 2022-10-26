@@ -11,7 +11,7 @@ export default class SCOREHUD extends Phaser.Scene{
     }
     create(){
         
-        let temp=localStorage.getItem(gameOptions.localStorageName1)
+        let temp=localStorage.getItem(gameOptions.localStorageName1);
         this.level=temp?parseInt(temp):1;
 
         this.targetscore=gameOptions.target_1;

@@ -1,5 +1,8 @@
 import { startgameProxy,START_GAME } from "../core/proxy";
+
 export default class StartGame extends Phaser.GameObjects.Container{
+    private gamename!:Phaser.GameObjects.Image;
+    private playing!:Phaser.GameObjects.Image;
     constructor(scene){
         //设置遮盖
         const mask=scene.add.graphics();
@@ -8,20 +11,16 @@ export default class StartGame extends Phaser.GameObjects.Container{
         
         super(scene,0,0,[mask]);
 
-        var gamename=scene.add.sprite(scene.scale.width/2,300,'gamename');
-        var playing=scene.add.sprite(scene.scale.width/2,700,'play').setInteractive();
-        gamename.setDepth(12);
-        playing.setDepth(12);
+        this.gamename=scene.add.sprite(scene.scale.width/2,300,'gamename');
+        this.add(this.gamename);
+        this.playing=scene.add.sprite(scene.scale.width/2,700,'play').setInteractive();
+        this.add(this.playing);
+        this.gamename.setDepth(1);
+        this.playing.setDepth(1);
         //scene.add.existing(this);
         
         //鼠标弹起时才能发送事件
-        playing.on('pointerup',()=>{
-            mask.setActive(false);
-            mask.setVisible(false);
-            playing.setActive(false);
-            playing.setVisible(false);
-            gamename.setActive(false);
-            gamename.setVisible(false);
+        this.playing.on('pointerup',()=>{
             //发送开始游戏事件
             startgameProxy.emit(START_GAME);
             
