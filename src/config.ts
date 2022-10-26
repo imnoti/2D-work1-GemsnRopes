@@ -3,6 +3,7 @@ import BackGround from './scenes/background';
 import Boot from './scenes/boot';
 import Play from './scenes/play';
 import SCOREHUD from './scenes/score'
+import { gameOptions } from "./consts/options";
 
 
 export const GameConfig: Phaser.Types.Core.GameConfig = {
@@ -24,7 +25,7 @@ export const GameConfig: Phaser.Types.Core.GameConfig = {
     default: "matter",
     matter: {
         gravity: {
-            y: 2
+            y:gameOptions.gravity
         },
         debug: true
     }

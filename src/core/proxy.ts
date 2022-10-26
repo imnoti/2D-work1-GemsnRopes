@@ -9,3 +9,7 @@ export const upadtescoreProxy = new Phaser.Events.EventEmitter();
 //开始计时事件
 export const TIMING="reckon_time";
 export const timingProxy = new Phaser.Events.EventEmitter();
+
+//游戏失败事件
+export const GAMEFAILED="game_failed";
+export const gamefailedProxy=new Phaser.Events.EventEmitter();

@@ -1,58 +1,61 @@
+import { gameOptions } from "../consts/options";
 import { BodyType } from "matter";
 import { startgameProxy,START_GAME } from "../core/proxy";
 import{upadtescoreProxy,UPDATE_SCORE} from "../core/proxy";
 import {timingProxy,TIMING } from "../core/proxy";
+import {gamefailedProxy,GAMEFAILED } from "../core/proxy";
 import BackGround from './background';
 import StartGame from './startgame';
 import Timer from './timer';
+
 export default class PlayScene extends Phaser.Scene{
     private startmenu!:StartGame;
     private player!:Phaser.Physics.Matter.Sprite;
     private stores :Phaser.Physics.Matter.Image[]=[];
     private stars:Phaser.Physics.Matter.Image[]=[];
-    private starsnum:number=3;
-    private  STORE:number=2;
-    private  STAR:number=1;
-    private  PLAYER:number=0;
-    private nonicollosion:number=1;
-    private icollosion:number=2;
-    private m_score=0;
+    private m_score;
     private rope;//绳子/约束
-    private graphics!: Phaser.GameObjects.Graphics;
+    private graphics!: Phaser.GameObjects.Graphics;//渲染约束
     private timerbar!:Timer;
     constructor(){
         super({key:"Play"});
     }
     create():void{
-       
-      //设置边界
+        //设置边界
         this.matter.world.setBounds(0,0,this.scale.width,1000);
         this.matter.world.createDebugGraphic();
         this.matter.world.drawDebug=false;
-      
+
         this.scene.launch('BackGround');
         this.startmenu=new StartGame(this);//开始界面
+
+        localStorage.clear();
+
+        //更新分数
+        let old=localStorage.getItem(gameOptions.localStorageName);
+        this.m_score=old?parseInt(old):0;
+
         this.player=this.matter.add.sprite(this.scale.width/2,1000,'player').setScale(0.75,0.75);
-        this.player.body.label=this.PLAYER;
-        this.player.setCollisionGroup(this.icollosion);
+        this.player.body.label=gameOptions.PLAYER;
+        this.player.setCollisionGroup(gameOptions.icollosion);
         //添加石头
-        for(let i=0;i<4;i++)
+        for(let i=0;i<gameOptions.storenum;i++)
         {
           let store=this.matter.add.sprite(this.scale.width/8+this.scale.width/4*i,150,"store");
           store.setStatic(true);
-          store.body.label=this.STORE;
-          store.setCollisionGroup(this.icollosion);
+          store.body.label=gameOptions.STORE;
+          store.setCollisionGroup(gameOptions.icollosion);
           this.stores.push(store as never);
         }
         
-        for(let i=0;i<this.starsnum;i++)
+        for(let i=0;i<gameOptions.starsnum;i++)
         {
           let star=this.matter.add.image(0,0,'star',i).setScale(0.75,0.75)
           star.setStatic(true);
           star.setVisible(false);
           star.setActive(false);
-          star.setCollisionGroup(this.icollosion);
-          star.body.label=this.STAR;
+          star.setCollisionGroup(gameOptions.icollosion);
+          star.body.label=gameOptions.STAR;
           this.stars.push(star as never);
         }
         
@@ -76,9 +79,10 @@ export default class PlayScene extends Phaser.Scene{
         if(this.rope){
           this.graphics.clear();
           //更新绳子的长度
-          this.rope.length-=4;
+          this.rope.length-=gameOptions.constraintSpeed;
           this.matter.world.renderConstraint(this.rope,this.graphics,0x0000ff,1,2,1,1,1);
         }
+        console.log(localStorage.getItem(gameOptions.localStorageName))
       }
 
     //发射绳子事件
@@ -134,26 +138,27 @@ export default class PlayScene extends Phaser.Scene{
   //随机出现宝石
    randstar():void
    {
-    let index:number=Phaser.Math.RND.between(0,this.starsnum-1);
+    let index:number=Phaser.Math.RND.between(0,gameOptions.starsnum-1);
     let x:number=Phaser.Math.RND.between(0,this.scale.width-100);
     let y:number=Phaser.Math.RND.between(0,this.scale.height/3*2);
-    this.stars[index].setCollisionGroup(this.icollosion);
+    this.stars[index].setCollisionGroup(gameOptions.icollosion);
     this.stars[index].setPosition(x,y);
     this.stars[index].setVisible(true);
     this.stars[index].setActive(true);
    }
    //碰撞事件的检测
    IcollisionStart(e,b1,b2):void{
-    if(b2.label==this.STAR && b1.label==this.PLAYER){
+    if(b2.label==gameOptions.STAR && b1.label==gameOptions.PLAYER){
       this.releaseHook();
     }
-    if(b2.label==this.STAR&& b1.label==this.PLAYER)
+    if(b2.label==gameOptions.STAR&& b1.label==gameOptions.PLAYER)
     {
       b2.gameObject.active=false;
       b2.gameObject.visible=false;
-      b2.collisionFilter.group = this.nonicollosion;
+      b2.collisionFilter.group = gameOptions.nonicollosion;
       b2.collisionFilter.mask = 0;
       this.m_score+=1;
+      localStorage.setItem(gameOptions.localStorageName,this.m_score);
       upadtescoreProxy.emit(UPDATE_SCORE,this.m_score);
       this.randstar();
     }
