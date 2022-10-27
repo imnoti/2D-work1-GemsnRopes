@@ -23,6 +23,8 @@ export default class Boot extends Phaser.Scene{
         this.load.image('yes','yes.png');
         this.load.image('no','no.png');
         this.load.image('win','win.png');
+        this.load.atlas('success', 'confi.png', 'confi.json');
+
     }
     create()
     {

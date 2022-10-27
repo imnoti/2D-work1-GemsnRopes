@@ -10,6 +10,7 @@ import BackGround from './background';
 import StartGame from '../sprites/startgame';
 import GameFail from '../sprites/gamefail';
 import Timer from './timer';
+import SEffect from "../sprites/specialEffects";
 
 export default class PlayScene extends Phaser.Scene{
     private startmenu!:StartGame;
@@ -23,6 +24,7 @@ export default class PlayScene extends Phaser.Scene{
     private timerbar!:Timer;
     private gamefail!:GameFail;
     private win!:Phaser.GameObjects.Image;
+    private seffect!:SEffect;
     constructor(){
         super({key:"Play"});
     }
@@ -33,14 +35,15 @@ export default class PlayScene extends Phaser.Scene{
         this.matter.world.drawDebug=false;
 
         this.scene.launch('BackGround');
-        this.startmenu=new StartGame(this);//开始界面
+        //开始ui
+        this.startmenu=new StartGame(this);
 
         localStorage.clear();
 
         //更新分数
         let old=localStorage.getItem(gameOptions.localStorageName);
         this.m_score=old?parseInt(old):0;
-        console.log(this.m_score);
+    
        
         this.target_score=gameOptions.target_1;
         console.log(this.target_score);
@@ -52,6 +55,7 @@ export default class PlayScene extends Phaser.Scene{
         for(let i=0;i<gameOptions.storenum;i++)
         {
           let store=this.matter.add.sprite(this.scale.width/8+this.scale.width/4*i,150,"store");
+          store.setSensor(true);
           store.setStatic(true);
           store.body.label=gameOptions.STORE;
           store.setCollisionGroup(gameOptions.icollosion);
@@ -64,6 +68,7 @@ export default class PlayScene extends Phaser.Scene{
           star.setStatic(true);
           star.setVisible(false);
           star.setActive(false);
+          star.setSensor(true);
           star.setCollisionGroup(gameOptions.icollosion);
           star.body.label=gameOptions.STAR;
           this.stars.push(star as never);
@@ -75,6 +80,8 @@ export default class PlayScene extends Phaser.Scene{
         this.gamefail=new GameFail(this);
         this.gamefail.setVisible(false);
         this.gamefail.setActive(false);
+
+        this.seffect=new SEffect(this);
 
         this.timerbar=new Timer(this);
         this.timerbar.setVisible(false).stoptimer();
@@ -103,7 +110,7 @@ export default class PlayScene extends Phaser.Scene{
        this.events.on(Phaser.Scenes.Events.SHUTDOWN,()=>{
         nogameProxy.off(NO_GAME,this.nogame,this);
        });
-
+      
 
         }
 
@@ -195,11 +202,15 @@ export default class PlayScene extends Phaser.Scene{
     }
     if(b2.label==gameOptions.STAR&& b1.label==gameOptions.PLAYER)
     {
+      const {x,y}=b2.position;
+      this.seffect.createMergeEffect(x,y);
+     
       b2.gameObject.active=false;
       b2.gameObject.visible=false;
       b2.collisionFilter.group = gameOptions.nonicollosion;
       b2.collisionFilter.mask = 0;
       this.m_score+=1;
+    
       
       upadtescoreProxy.emit(UPDATE_SCORE,this.m_score);
       if(this.m_score==this.target_score)
@@ -208,7 +219,9 @@ export default class PlayScene extends Phaser.Scene{
       timerstopProxy.emit(TIMER_STOP);
       this.timerbar.stoptimer();
       this.GameOver();
+     this.seffect.createParticles();
       localStorage.setItem(gameOptions.localStorageName,this.m_score);
+     
       }
 
       this.randstar();

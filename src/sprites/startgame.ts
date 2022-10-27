@@ -17,7 +17,7 @@ export default class StartGame extends Phaser.GameObjects.Container{
         this.add(this.playing);
         this.gamename.setDepth(1);
         this.playing.setDepth(1);
-        //scene.add.existing(this);
+        scene.add.existing(this);
         
         //鼠标弹起时才能发送事件
         this.playing.on('pointerup',()=>{
