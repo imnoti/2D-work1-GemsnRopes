@@ -5,11 +5,8 @@ export default class SEffect
     
     constructor(scene:Phaser.Scene)
     {
-       
         this.particles = scene.add.particles('success');
         this.scene=scene;
-       
-      
     }
     createParticles() :void
     {

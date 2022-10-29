@@ -1,5 +1,5 @@
 import { gameOptions } from "../consts/options";
-import {gamefailedProxy,GAME_FAILED } from "../core/proxy";
+import {gameoverProxy,GAME_OVER } from "../core/proxy";
 
 //计时器
 export default class Timer extends Phaser.GameObjects.Container{
@@ -29,7 +29,7 @@ export default class Timer extends Phaser.GameObjects.Container{
          //a boring timer
          this.gameTime=this.scene.time.addEvent({
             //The  dalay in ms at which this TimerEvent fires
-            delay:1000,
+            delay:100,
             callback:this.mytimerbar,
             //The scope in which the callback will be called
             //调用回调的作用域,
@@ -47,7 +47,7 @@ export default class Timer extends Phaser.GameObjects.Container{
     this.energyMask.x-=stepWidth;
     if(this.timeleft<=0){
       this.gameTime.paused=true;
-      gamefailedProxy.emit(GAME_FAILED);
+      gameoverProxy.emit(GAME_OVER);
       
     };
   }
@@ -56,5 +56,10 @@ export default class Timer extends Phaser.GameObjects.Container{
   }
   public starttimer():void{
     this.gameTime.paused=false;
+  }
+  reset():void
+  {
+    this.timeleft=gameOptions.initialTime;
+    this.energyMask.x=this.energybar.x;
   }
 }

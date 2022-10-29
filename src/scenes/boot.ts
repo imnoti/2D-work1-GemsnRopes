@@ -24,6 +24,14 @@ export default class Boot extends Phaser.Scene{
         this.load.image('no','no.png');
         this.load.image('win','win.png');
         this.load.atlas('success', 'confi.png', 'confi.json');
+        this.load.spritesheet('bird','flybird.png',{frameWidth:36,frameHeight:24});
+
+
+        this.load.setPath('assets/sounds')
+        this.load.audio('scoresound',['score.mp3','score.ogg']);
+        this.load.audio('movesound',['move.mp3','move.ogg']);
+        this.load.audio('growsound',['move.mp3','move.ogg']);
+
 
     }
     create()

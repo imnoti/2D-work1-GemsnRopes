@@ -17,15 +17,14 @@ export const gameOptions ={
     constraintSpeed:4,
     //每次游戏的事件，计时器中的时间
     initialTime:60,
-    //存储当前的分数
+    //存储最高分
     localStorageName:'bestScore',
     //非碰撞组索引
     nonicollosion:1,
     //碰撞组索引
     icollosion:2,
-    //当前关卡
-    localStorageName1:'level',
-    //第一关的目标分数
-    target_1:4
+    //玩家 大小
+    playersize:50
+   
 
 }

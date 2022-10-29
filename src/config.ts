@@ -1,8 +1,6 @@
 import 'phaser';
-import BackGround from './scenes/background';
 import Boot from './scenes/boot';
 import Play from './scenes/play';
-import SCOREHUD from './scenes/score'
 import { gameOptions } from "./consts/options";
 
 
@@ -19,7 +17,7 @@ export const GameConfig: Phaser.Types.Core.GameConfig = {
   },
   type: Phaser.AUTO,
   parent: 'game',
-  scene: [Boot,BackGround,Play,SCOREHUD],
+  scene: [Boot,Play],
   backgroundColor: '#003412',
   physics: {
     default: "matter",
@@ -29,7 +27,6 @@ export const GameConfig: Phaser.Types.Core.GameConfig = {
         },
         debug: true
     }
-},
-  render: { pixelArt: false, antialias: true }
+}
 };
 
