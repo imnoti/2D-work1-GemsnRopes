@@ -29,7 +29,7 @@ export default class Timer extends Phaser.GameObjects.Container{
          //a boring timer
          this.gameTime=this.scene.time.addEvent({
             //The  dalay in ms at which this TimerEvent fires
-            delay:100,
+            delay:1000,
             callback:this.mytimerbar,
             //The scope in which the callback will be called
             //调用回调的作用域,
@@ -48,6 +48,7 @@ export default class Timer extends Phaser.GameObjects.Container{
     if(this.timeleft<=0){
       this.gameTime.paused=true;
       gameoverProxy.emit(GAME_OVER);
+      
       
     };
   }
